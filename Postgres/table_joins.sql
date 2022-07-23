@@ -58,8 +58,68 @@ JOIN movies mo USING (director_id)
 WHERE mo.movie_lang IN ('Japanese','Chinese','Korean')
 
 -- select movie names, release dates and international takings of all english lang movies
-SELECT mo.movie_name, mr.domestic_takings, mr.international_takings FROM movies mo 
+SELECT mo.movie_name, mo.release_date, mr.international_takings FROM movies mo 
 JOIN movie_revenues mr ON mo.movie_id = mr.movie_id
-ORDER BY mr.domestic_takings;
+WHERE mo.movie_lang IN ('English')
 
 -- select movie names, domestic takings, international takings for all movies with either missing domestic takings or missing international takings and order the results by movie names
+SELECT mo.movie_name, mr.domestic_takings, mr.international_takings FROM movies mo 
+JOIN movie_revenues mr ON mo.movie_id = mr.movie_id
+WHERE mr.domestic_takings IN (null) OR mr.international_takings IN (null)
+ORDER BY mo.movie_name;
+
+-- can't use IN (null) for IN ('')
+SELECT mo.movie_name, mr.domestic_takings, mr.international_takings FROM movies mo 
+JOIN movie_revenues mr ON mo.movie_id = mr.movie_id
+WHERE mr.domestic_takings IS null OR mr.international_takings IS null
+ORDER BY mo.movie_name;
+
+-- left joins
+-- christopher nolan appears but with no movie
+SELECT d.director_id, d.first_name, d.last_name, mo.movie_name FROM directors d
+LEFT JOIN movies mo ON d.director_id = mo.director_id;
+
+SELECT d.director_id, d.first_name, d.last_name, mo.movie_name FROM movies mo
+LEFT JOIN directors d ON d.director_id = mo.director_id;
+
+SELECT d.director_id, d.first_name, d.last_name, mo.movie_name FROM directors d
+LEFT JOIN movies mo ON d.director_id = mo.director_id
+WHERE d.nationality = 'British';
+
+-- right joins
+-- just the opposite of left joins
+SELECT d.director_id, d.first_name, d.last_name, mo.movie_name FROM movies mo
+RIGHT JOIN directors d ON d.director_id = mo.director_id;
+
+SELECT d.director_id, d.first_name, d.last_name, mo.movie_name FROM movies mo
+RIGHT JOIN directors d ON d.director_id = mo.director_id
+WHERE mo.age_certificate = '18';
+
+-- full joins
+-- table order doesnt matter, since all data is returned anyway
+SELECT d.director_id, d.first_name, d.last_name, mo.movie_name FROM directors d
+FULL JOIN movies mo ON d.director_id = mo.director_id;
+
+SELECT d.director_id, d.first_name, d.last_name, mo.movie_name FROM directors d
+FULL JOIN movies mo ON d.director_id = mo.director_id
+WHERE mo.movie_lang IN ('German','Korean')
+ORDER BY d.last_name;
+
+-- challenge
+-- use left join to select first and last name of all british directors and name and age certificates of all the movies they directed
+SELECT d.first_name, d.last_name, mo.movie_name, mo.age_certificate FROM directors d
+LEFT JOIN movies mo ON d.director_id = mo.director_id
+WHERE d.nationality = 'British';
+
+-- count the number of movies that each director has directed
+SELECT d.first_name, d.last_name, COUNT(mo.movie_name) FROM directors d
+FULL JOIN movies mo ON d.director_id = mo.director_id;
+
+-- count must use group by
+SELECT d.first_name, d.last_name, COUNT(mo.movie_id) FROM directors d
+LEFT JOIN movies mo ON d.director_id = mo.director_id
+GROUP BY d.first_name, d.last_name;
+-- this works too, edited from original answer
+SELECT d.first_name, d.last_name, COUNT(mo.movie_name) FROM directors d
+FULL JOIN movies mo ON d.director_id = mo.director_id
+GROUP BY d.first_name, d.last_name;
