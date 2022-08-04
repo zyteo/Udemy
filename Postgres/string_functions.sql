@@ -44,3 +44,66 @@ SELECT reverse(first_name), reverse(last_name), left(nationality, 3) FROM direct
 SELECT left(last_name, 1) AS initials FROM directors;
 
 SELECT CONCAT_WS('.', LEFT(first_name, 1), LEFT(last_name, 1)) AS initials FROM directors;
+
+-- substring function
+SELECT substring('long string', 5, 3);
+SELECT first_name, substring(first_name, 3, 4) FROM actors;
+
+-- replace function
+SELECT replace('a cat plays with another cat', 'cat', 'dog');
+
+SELECT first_name, last_name, REPLACE(gender, 'M', 'Male') FROM actors;
+
+SELECT * FROM actors;
+
+UPDATE directors
+SET nationality = REPLACE(nationality, 'American', 'USA')
+WHERE nationality = 'American'
+
+SELECT * FROM directors;
+
+-- split part function
+SELECT SPLIT_PART('first_name.last_name@gmail.com', '@', 1);
+
+SELECT movie_name, SPLIT_PART(movie_name, ' ', 1) AS first_word
+FROM movies;
+
+SELECT movie_name, SPLIT_PART(movie_name, ' ', 1) AS first_word
+SPLIT_PART(movie_name, ' ', 2) AS second_word,
+FROM movies;
+
+-- cast operator :: to apply string functions to non-string data types
+SELECT * FROM directors;
+
+SELECT date_of_birth::TEXT FROM directors;
+
+SELECT SPLIT_PART(date_of_birth::TEXT, '-', 1) FROM directors;
+SELECT SPLIT_PART(date_of_birth::TEXT, '-', 2) FROM directors;
+SELECT SPLIT_PART(date_of_birth::TEXT, '-', 3) FROM directors;
+
+-- challenge
+-- use the substring function to retrieve the first 6 characters of each movie name and the year they were released
+SELECT substring(movie_name, 1, 6), substring(release_date::TEXT, 1, 4) FROM movies;
+
+SELECT substring(movie_name, 1, 6) AS movie_name, substring(release_date::TEXT, 1, 4) AS year FROM movies;
+
+-- retrieve the first name initial and last name of every actor born in may
+-- need to first select the actors that are born in may, so nested select statement expected
+SELECT SPLIT_PART(first_name, ' ', 1), last_name FROM actors
+WHERE (SPLIT_PART(date_of_birth::TEXT, '-', 2) ) LIKE '05';
+
+SELECT SPLIT_PART(first_name, ' ', 1), last_name FROM actors
+WHERE date_of_birth::TEXT LIKE '%-05-%';
+
+SELECT substring(first_name, 1, 1) AS fn_initial, last_name, date_of_birth FROM actors
+WHERE (SPLIT_PART(date_of_birth::TEXT, '-', 2) ) = '05';
+
+-- replace the movie language for all english lang movies, with age cert 18, to 'Eng'
+-- need to first select the english lang movies with age cert of 18
+UPDATE movies
+SET movie_lang = REPLACE(movie_lang, 'English', 'Eng')
+WHERE movie_lang = 'English' AND age_certificate = '18';
+
+UPDATE movies
+SET movie_lang = REPLACE(movie_lang, 'English', 'Eng')
+WHERE age_certificate = '18';
